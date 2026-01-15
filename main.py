@@ -1,15 +1,18 @@
 from fastapi import FastAPI
 import pyodbc
+import os
 
 app = FastAPI()
 
-# CONFIGURAÇÃO DO SQL SERVER (depois você troca pelos dados do Railway)
+# Conexão usando variáveis de ambiente do Railway
 conn_str = (
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=SEU_SERVIDOR;"
-    "DATABASE=SEU_BANCO;"
-    "UID=SEU_USUARIO;"
-    "PWD=SUA_SENHA;"
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={os.getenv('SERVER')},{os.getenv('PORT')};"
+    f"DATABASE={os.getenv('DATABASE')};"
+    f"UID={os.getenv('UID')};"
+    f"PWD={os.getenv('PWD')};"
+    "Encrypt=yes;"
+    "TrustServerCertificate=yes;"
 )
 
 def get_conn():
@@ -20,11 +23,10 @@ async def create_orderdetail(data: dict):
     conn = get_conn()
     cursor = conn.cursor()
 
-    # Insere tudo como JSON bruto em uma tabela temporária (mais simples para começar)
     cursor.execute(
         "INSERT INTO OrderDetailsRaw (json_data) VALUES (?)",
         (str(data),)
     )
     conn.commit()
 
-    return {"status": "OK", "message": "Recebido com sucesso"}
+    return {"status": "OK", "message": "OrderDetail recebido com sucesso"}
